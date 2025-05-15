@@ -3,10 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "npm run copy-pdfjs-files && next dev",
+    "build": "npm run copy-pdfjs-files && next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "copy-pdfjs-files": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"New-Item -ItemType Directory -Path 'public/pdfjs-dist' -Force -ErrorAction SilentlyContinue; Copy-Item -Path 'node_modules/pdfjs-dist/build/pdf.worker.min.mjs' -Destination 'public/pdfjs-dist/' -Force; Copy-Item -Path 'node_modules/pdfjs-dist/cmaps' -Destination 'public/pdfjs-dist/' -Recurse -Force\""
   },
   "dependencies": {
     "mammoth": "^1.9.0",

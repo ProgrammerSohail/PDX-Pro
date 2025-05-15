@@ -270,9 +270,7 @@ Web Files: .htm, .html
 
 Text Files: .txt, .rtf
 
-Multimedia Files: .mp4, .mov, .mp3, .wav, .swf
 
-3D Model Files: .u3d, .prc
 
 Form Data Files: .fdf, .xfdf
 

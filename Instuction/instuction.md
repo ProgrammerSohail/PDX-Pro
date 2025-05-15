@@ -25,3 +25,5 @@
 
 ### Project Structure
 The project follows a modular component-based architecture:
+Follow the `architecture.md` file
+for better filder and file structureplease

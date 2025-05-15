@@ -3,79 +3,115 @@
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 
-// We'll set up the worker in a useEffect hook to ensure it only runs client-side
-// This prevents errors during SSR and initial hydration
-
+// Define the props interface
 interface PdfViewerProps {
   fileContent: string | ArrayBuffer | null;
+}
+
+// Set up PDF.js worker once globally
+if (typeof window !== 'undefined') {
+  pdfjs.GlobalWorkerOptions.workerSrc = `/pdfjs-dist/pdf.worker.min.mjs`;
 }
 
 const PdfViewer: React.FC<PdfViewerProps> = ({ fileContent }) => {
   const [numPages, setNumPages] = useState<number | null>(null);
   const [pageNumber, setPageNumber] = useState(1);
   const [scale, setScale] = useState(1);
-  const [isLoadingPage, setIsLoadingPage] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [workerInitialized, setWorkerInitialized] = useState(false);
+  const [pdfDataUri, setPdfDataUri] = useState<string | null>(null);
+  const objectUrlRef = useRef<string | null>(null); // To keep track of created object URLs
 
-  // Initialize PDF.js worker
+  // Memoize the document options
+  const documentOptions = useMemo(() => ({
+    cMapUrl: '/pdfjs-dist/cmaps/',
+    cMapPacked: true,
+  }), []); // Empty dependency array means it's created once
+
   useEffect(() => {
-    const initializeWorker = async () => {
+    // Clean up previous object URL if it exists
+    if (objectUrlRef.current) {
+      URL.revokeObjectURL(objectUrlRef.current);
+      objectUrlRef.current = null;
+    }
+    setPdfDataUri(null); // Reset data URI to trigger loading state for new file
+    setIsLoading(true); // Set loading true when fileContent changes
+    setError(null); // Clear previous errors
+
+    if (fileContent) {
       try {
-        // Use the local worker file from the public directory
-        const workerUrl = `${window.location.origin}/pdf-worker/pdf.worker.min.mjs`;
-        pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
-        
-        setWorkerInitialized(true);
-      } catch (err) {
-        console.error('Failed to initialize PDF worker:', err);
-        // Try CDN fallback if the local worker fails
-        try {
-          pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
-          setWorkerInitialized(true);
-        } catch (fallbackErr) {
-          console.error('Fallback PDF worker initialization also failed:', fallbackErr);
-          setError('Failed to initialize PDF viewer. Please try again later.');
+        if (fileContent instanceof ArrayBuffer) {
+          const blob = new Blob([fileContent], { type: 'application/pdf' });
+          const url = URL.createObjectURL(blob);
+          objectUrlRef.current = url; // Store the new object URL
+          setPdfDataUri(url);
+          setIsLoading(false);
+        } else if (typeof fileContent === 'string') {
+          setPdfDataUri(fileContent);
+          setIsLoading(false);
+        } else {
+          setError("Invalid PDF data type.");
+          setIsLoading(false);
         }
+      } catch (err) {
+        console.error('Error processing PDF data:', err);
+        setError('Error preparing PDF for display. Please try a different file.');
+        setIsLoading(false);
+      }
+    } else {
+      setIsLoading(false); // No file content, so not loading
+    }
+
+    // Cleanup function to revoke object URL when component unmounts or fileContent changes again
+    return () => {
+      if (objectUrlRef.current) {
+        URL.revokeObjectURL(objectUrlRef.current);
+        objectUrlRef.current = null;
       }
     };
+  }, [fileContent]);
 
-    // Ensure this runs only on the client side
-    if (typeof window !== 'undefined') {
-      initializeWorker();
+  const onDocumentLoadSuccess = useCallback(({ numPages }: { numPages: number }) => {
+    setNumPages(numPages);
+    setPageNumber(1); // Reset to first page
+    setIsLoading(false);
+    setError(null);
+  }, []);
+
+  const onDocumentLoadError = useCallback((err: Error) => {
+    console.error('Error loading PDF document:', err);
+    setIsLoading(false);
+    if (err.name === 'RenderingCancelledException' || err.message.includes('Transport destroyed')) {
+      setError('PDF loading was interrupted. Please try reloading the file.');
+    } else {
+      setError('Failed to load the PDF document. The file might be corrupted or unsupported.');
     }
   }, []);
 
-  function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
-    setNumPages(numPages);
-    setPageNumber(1); // Reset to first page on new document load
-    setError(null);
-  }
+  const onPageRenderError = useCallback(() => {
+    console.warn('Error rendering page. Trying to reset view.');
+    setError("Error rendering page. Try a different zoom level or reload the file.");
+  }, []);
 
-  function onPageLoadSuccess() {
-    setIsLoadingPage(false);
-  }
-
-  function onPageLoadError() {
-    setIsLoadingPage(false);
-  }
-
-  function onDocumentLoadError(err: Error) {
-    console.error('Error loading PDF document:', err);
-    setIsLoadingPage(false);
-    setError('Failed to load the PDF document. The file might be corrupted or unsupported.');
-  }
+  // Reset view when file is cleared
+  useEffect(() => {
+    if (!fileContent) {
+      setNumPages(null);
+      setPageNumber(1);
+      setScale(1);
+      setError(null);
+      setIsLoading(false); 
+    }
+  }, [fileContent]);
 
   const handlePreviousPage = () => {
     setPageNumber((prevPageNumber) => Math.max(prevPageNumber - 1, 1));
-    setIsLoadingPage(true);
   };
 
   const handleNextPage = () => {
     setPageNumber((prevPageNumber) => Math.min(prevPageNumber + 1, numPages || 1));
-    setIsLoadingPage(true);
   };
 
   const handleZoomIn = () => {
@@ -96,7 +132,10 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ fileContent }) => {
         <p className="font-semibold mb-1">Error</p>
         <p>{error}</p>
         <button 
-          onClick={() => setError(null)}
+          onClick={() => {
+            setError(null); 
+            // Potentially add a retry mechanism or clear file state here
+          }}
           className="mt-2 px-3 py-1 bg-red-200 dark:bg-red-800 rounded hover:bg-red-300 dark:hover:bg-red-700 transition-colors"
         >
           Dismiss
@@ -105,41 +144,17 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ fileContent }) => {
     );
   }
 
-  if (!workerInitialized) {
-    return (
-      <div className="flex justify-center items-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-        <span className="ml-3">Initializing PDF viewer...</span>
-      </div>
-    );
-  }
-
   if (!fileContent) {
     return <div className="text-center py-4 text-gray-500 dark:text-gray-400">Select a PDF file to view.</div>;
   }
-
-  // Check for empty ArrayBuffer or empty string - with improved validation
-  if (
-    (fileContent instanceof ArrayBuffer && fileContent.byteLength === 0) ||
-    (typeof fileContent === 'string' && fileContent.length === 0)
-  ) {
+  
+  if (isLoading || !pdfDataUri) { // Show loading if isLoading is true OR pdfDataUri is not yet set
     return (
-      <div className="bg-yellow-100 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400 p-4 rounded-lg border border-yellow-400 dark:border-yellow-800">
-        <p className="font-semibold mb-1">Warning</p>
-        <p>The selected PDF file is empty or corrupted. Please select a valid PDF file.</p>
+      <div className="flex justify-center items-center py-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        <span className="ml-3">Loading PDF...</span>
       </div>
     );
-  }
-
-  // Create a data URL for the file content if it's an ArrayBuffer
-  let pdfData = fileContent;
-  if (fileContent instanceof ArrayBuffer) {
-    try {
-      const blob = new Blob([fileContent], { type: 'application/pdf' });
-      pdfData = URL.createObjectURL(blob);
-    } catch (err) {
-      console.error('Error creating object URL for PDF:', err);
-    }
   }
 
   return (
@@ -155,11 +170,11 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ fileContent }) => {
             &lt;
           </button>
           <span className="text-sm">
-            Page <span className="font-medium">{pageNumber}</span> of <span className="font-medium">{numPages || 0}</span>
+            Page <span className="font-medium">{pageNumber}</span> of <span className="font-medium">{numPages || '-'}</span>
           </span>
           <button
             onClick={handleNextPage}
-            disabled={pageNumber >= (numPages || 1)}
+            disabled={!numPages || pageNumber >= numPages}
             className="px-3 py-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50"
             aria-label="Next page"
           >
@@ -195,25 +210,35 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ fileContent }) => {
       </div>
 
       <div className="flex justify-center relative">
-        {isLoadingPage && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white/70 dark:bg-gray-800/70 z-10">
-            <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
-          </div>
-        )}
         <Document
-          file={pdfData}
+          file={pdfDataUri} // Use the state that holds the object URL or direct URL/base64
           onLoadSuccess={onDocumentLoadSuccess}
           onLoadError={onDocumentLoadError}
+          loading={
+            <div className="flex justify-center items-center p-10">
+              <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
+              <span className="ml-2">Loading document...</span>
+            </div>
+          }
           className="border border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden shadow-lg"
+          options={documentOptions} // Use the memoized options
+          key={pdfDataUri} // Add key to force re-render of Document component when file changes
         >
-          <Page 
-            pageNumber={pageNumber} 
-            scale={scale}
-            onLoadSuccess={onPageLoadSuccess}
-            onRenderError={onPageLoadError}
-            renderTextLayer={true}
-            renderAnnotationLayer={true}
-          />
+          {numPages && (
+            <Page 
+              pageNumber={pageNumber} 
+              scale={scale}
+              loading={
+                <div className="flex justify-center items-center p-10">
+                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+                  <span className="ml-2">Rendering page...</span>
+                </div>
+              }
+              renderTextLayer={true}
+              renderAnnotationLayer={true}
+              onRenderError={onPageRenderError}
+            />
+          )}
         </Document>
       </div>
     </div>

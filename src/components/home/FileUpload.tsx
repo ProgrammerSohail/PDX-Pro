@@ -25,11 +25,11 @@ const SUPPORTED_EXTENSIONS = [
   // Multimedia Files
   '.mp4', '.mov', '.mp3', '.wav', '.swf',
   // 3D Model Files
-  '.u3d', '.prc',
+  '.u3d', '.prc', '.stl', '.obj', '.fbx', '.step',
   // Form Data Files
   '.fdf', '.xfdf',
-  // Other Files
-  '.xps', '.xml'
+  // Other Application/Config Files
+  '.xps', '.xml', '.joboptions', '.acrodata', '.sequent', '.acrosequ', '.acrolang', '.acroplugin', '.api', '.acrobatsecuritysettings', '.ast', '.env', '.lex', '.mars', '.apf', '.mjd', '.pdx', '.jdf', '.lng'
 ];
 
 // Map file extensions to MIME types
@@ -68,8 +68,42 @@ const MIME_TYPES: Record<string, string> = {
   // Text Files
   '.txt': 'text/plain',
   '.rtf': 'application/rtf',
+  // Multimedia Files
+  '.mp4': 'video/mp4',
+  '.mov': 'video/quicktime',
+  '.mp3': 'audio/mpeg',
+  '.wav': 'audio/wav',
+  '.swf': 'application/x-shockwave-flash',
+  // 3D Model Files
+  '.u3d': 'application/vnd.u3d',
+  '.prc': 'application/prc',
+  '.stl': 'model/stl',
+  '.obj': 'model/obj',
+  '.fbx': 'application/octet-stream', // Common MIME for FBX, might need adjustment
+  '.step': 'application/step',
+  // Form Data Files
   '.fdf': 'application/vnd.fdf',
-  '.xfdf': 'application/vnd.adobe.xfdf'
+  '.xfdf': 'application/vnd.adobe.xfdf',
+  // Other Application/Config Files
+  '.xps': 'application/vnd.ms-xpsdocument',
+  '.xml': 'application/xml',
+  '.joboptions': 'application/postscript',
+  '.acrodata': 'application/octet-stream',
+  '.sequent': 'application/octet-stream',
+  '.acrosequ': 'application/octet-stream',
+  '.acrolang': 'application/octet-stream',
+  '.acroplugin': 'application/octet-stream',
+  '.api': 'application/octet-stream',
+  '.acrobatsecuritysettings': 'application/octet-stream',
+  '.ast': 'application/octet-stream',
+  '.env': 'text/plain',
+  '.lex': 'text/plain',
+  '.mars': 'application/octet-stream',
+  '.apf': 'application/octet-stream',
+  '.mjd': 'application/octet-stream',
+  '.pdx': 'application/vnd.adobe.pdx',
+  '.jdf': 'application/vnd.cip4-jdf+xml',
+  '.lng': 'text/plain'
 };
 
 // Map file types to categories for the editor
@@ -101,8 +135,18 @@ const FILE_CATEGORIES: Record<string, string> = {
   'audio/mpeg': 'multimedia',
   'audio/wav': 'multimedia',
   'application/x-shockwave-flash': 'multimedia',
+  'application/vnd.u3d': '3d-model',
+  'application/prc': '3d-model',
+  'model/stl': '3d-model',
+  'model/obj': '3d-model',
+  'application/octet-stream': '3d-model', // Catch-all for FBX and potentially others
+  'application/step': '3d-model',
   'application/vnd.fdf': 'forms',
-  'application/vnd.adobe.xfdf': 'forms'
+  'application/vnd.adobe.xfdf': 'forms',
+  'application/vnd.ms-xpsdocument': 'other',
+  'application/xml': 'other',
+  'application/vnd.adobe.pdx': 'other',
+  'application/vnd.cip4-jdf+xml': 'other'
 };
 
 const FileUpload = () => {
@@ -167,22 +211,14 @@ const FileUpload = () => {
         
         // For PDF files, validate the content before proceeding
         if (file.type === 'application/pdf') {
-          // Basic PDF validation - check for PDF signature
-          if (typeof result === 'string') {
-            if (!result.startsWith('%PDF-')) {
-              setError('The uploaded file is not a valid PDF. Please check the file and try again.');
-              setIsLoading(false);
-              return;
-            }
-          } else if (result instanceof ArrayBuffer) {
-            const bytes = new Uint8Array(result.slice(0, 5));
-            const header = String.fromCharCode.apply(null, Array.from(bytes));
-            if (!header.startsWith('%PDF-')) {
-              setError('The uploaded file is not a valid PDF. Please check the file and try again.');
-              setIsLoading(false);
-              return;
-            }
+          // Minimal validation - we'll let the PDF viewer handle most of the validation
+          if (file.size === 0) {
+            setError('The PDF file appears to be empty. Please select a valid PDF file.');
+            setIsLoading(false);
+            return;
           }
+          
+          // All other validation is handled by the PDF viewer component
         }
         
         setFileContent(result);
@@ -348,89 +384,52 @@ const FileUpload = () => {
   }
 
   return (
-    <div className="container mx-auto min-h-screen">
-      <div className="bg-white overflow-hidden w-full mx-auto">
-        <div className="grid min-h-screen grid-cols-1 md:grid-cols-2">
-          <div className="bg-blue-600 dark:bg-blue-800 p-8 md:p-12 text-white">
-            <h2 className="text-3xl font-bold mb-4">Get Started</h2>
-            <p className="mb-6 opacity-90">
-              Upload your documents and start processing them instantly. All processing happens in your browser for maximum privacy.
-            </p>
-            <ul className="space-y-3 mb-8">
-              <li className="flex items-center">
-                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"></path>
-                </svg>
-                Edit PDF documents
-              </li>
-              <li className="flex items-center">
-                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"></path>
-                </svg>
-                OCR text recognition
-              </li>
-              <li className="flex items-center">
-                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"></path>
-                </svg>
-                Convert file formats
-              </li>
-              <li className="flex items-center">
-                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"></path>
-                </svg>
-                Vector conversion
-              </li>
-            </ul>
+    <div className="container mx-auto px-4 py-8">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden max-w-5xl mx-auto p-6">
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800">
+            {error}
           </div>
-          
-          <div className="p-8 md:p-12 flex flex-col justify-center">
-            {error && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800">
-                {error}
-              </div>
-            )}
-            
-            {isLoading ? (
-              <div className="flex justify-center items-center py-8">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-              </div>
-            ) : (
-              <div 
-                className={`border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center 
-                          ${isDragging ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : ''} 
-                          hover:border-blue-500 dark:hover:border-blue-400 transition-colors cursor-pointer`}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                onClick={() => document.getElementById('file-input')?.click()}
-              >
-                <input 
-                  id="file-input"
-                  type="file" 
-                  onChange={handleInputChange}
-                  accept={SUPPORTED_EXTENSIONS.join(',')}
-                  className="hidden" 
-                />
-                <div className="flex flex-col items-center justify-center">
-                  <svg className="w-16 h-16 text-gray-400 dark:text-gray-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                  </svg>
-                  <h3 className="text-xl font-semibold mb-2">Upload Document</h3>
-                  <p className="text-gray-500 dark:text-gray-400 mb-4">
-                    Drag & drop files or click to select
-                  </p>
-                  <span className="inline-block px-5 py-2.5 bg-blue-600 text-white font-medium rounded hover:bg-blue-700 transition-colors">
-                    Browse Files
-                  </span>
-                </div>
-              </div>
-            )}
-            <p className="text-sm text-center text-gray-500 dark:text-gray-400 mt-4">
-              Supported formats: PDF, DOCX, XLSX, Images, and more
-            </p>
+        )}
+        
+        {isLoading ? (
+          <div className="flex justify-center items-center py-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
           </div>
-        </div>
+        ) : (
+          <div 
+            className={`border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center 
+                      ${isDragging ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : ''} 
+                      hover:border-blue-500 dark:hover:border-blue-400 transition-colors cursor-pointer`}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            onClick={() => document.getElementById('file-input')?.click()}
+          >
+            <input 
+              id="file-input"
+              type="file" 
+              onChange={handleInputChange}
+              accept={SUPPORTED_EXTENSIONS.join(',')}
+              className="hidden" 
+            />
+            <div className="flex flex-col items-center justify-center">
+              <svg className="w-16 h-16 text-gray-400 dark:text-gray-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+              </svg>
+              <h3 className="text-xl font-semibold mb-2">Upload Document</h3>
+              <p className="text-gray-500 dark:text-gray-400 mb-4">
+                Drag & drop files or click to select
+              </p>
+              <span className="inline-block px-5 py-2.5 bg-blue-600 text-white font-medium rounded hover:bg-blue-700 transition-colors">
+                Browse Files
+              </span>
+            </div>
+          </div>
+        )}
+        <p className="text-sm text-center text-gray-500 dark:text-gray-400 mt-4">
+          Supported formats: PDF, DOCX, Office files, Images, and many more
+        </p>
       </div>
     </div>
   );
