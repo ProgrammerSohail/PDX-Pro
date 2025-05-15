@@ -1,0 +1,112 @@
+# Change Log
+
+## 2025-05-15
+
+- Prioritized Dark Mode configuration as Step 1 in the `steps` file.
+- Created `src/components/DarkModeToggle.tsx` component to handle dark mode toggling and persistence using local storage.
+- Integrated `DarkModeToggle` component into `src/app/layout.tsx`.
+- Corrected import path for `DarkModeToggle` in `src/app/layout.tsx` to use the `@/components` alias.
+- Configured dark mode colors in `src/app/globals.css` using CSS variables under the `:root.dark` selector, implementing a dark grey palette.
+- Applied Tailwind CSS classes (`bg-background`, `text-foreground`, `bg-primary`) in `src/app/page.tsx` to utilize the defined CSS variables for background and text colors, enabling dark mode styling on the main page content.
+- Created `src/app/process/page.tsx` for document upload and viewing.
+- Implemented file input and handling in `src/app/process/page.tsx` to read file content.
+- Created `src/components/PdfViewer.tsx` using `react-pdf` for PDF viewing.
+- Created `src/components/DocxViewer.tsx` using `mammoth` for DOCX viewing.
+- Integrated `PdfViewer` and `DocxViewer` into `src/app/process/page.tsx` with conditional rendering based on file type.
+- Corrected import paths for `PdfViewer` and `DocxViewer` in `src/app/process/page.tsx` to use the `@/components` alias.
+- Installed `react-pdf` and `mammoth` dependencies using bun.
+
+## 2025-05-16
+
+- Modified `src/components/PdfViewer.tsx` to correctly initialize the PDF.js worker for Next.js by setting `pdfjs.GlobalWorkerOptions.workerSrc` to `new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString()`. This addresses the "Cannot find module 'pdfjs-dist/build/pdf.worker.entry'" error. <mcreference link="https://www.npmjs.com/package/react-pdf" index="4">4</mcreference>
+- Updated `next.config.ts` to include `webpack: (config) => { config.resolve.alias.canvas = false; return config; }` as recommended by `react-pdf` documentation for Next.js projects to resolve potential canvas-related issues. <mcreference link="https://www.npmjs.com/package/react-pdf" index="4">4</mcreference>
+- Created plan.md file to track all next plan.
+- Enhanced `src/app/process/page.tsx` with drag-and-drop functionality for improved user experience.
+- Added file type validation to ensure only PDF and DOCX files are accepted.
+- Implemented loading states with animated spinners to provide better feedback during file processing.
+- Added comprehensive error handling for file operations with user-friendly error messages.
+- Enhanced file information display to show size, type, and last modified date.
+- Improved the `PdfViewer` component with zoom functionality (zoom in, zoom out, reset zoom).
+- Added page loading indicators to the PDF viewer for better user experience.
+- Enhanced the `DocxViewer` component with improved styling for better document readability.
+- Added custom CSS styles for DOCX content to maintain proper formatting of headings, tables, lists, etc.
+- Implemented support for DOCX style mapping to preserve document structure.
+- Added responsive design improvements for better viewing on different devices.
+- Ensured dark mode compatibility across all components with appropriate color schemes.
+- Improved accessibility with proper ARIA labels and semantic HTML.
+
+## 2025-05-17
+
+- Completely redesigned the homepage (`src/app/page.tsx`) with a modern UI including:
+  - Hero section with a clear headline and call-to-action buttons
+  - Featured file upload section with visual indicators and instructions
+  - Key features grid showcasing the app's capabilities with icons
+  - Footer with copyright information and links
+- Updated the layout (`src/app/layout.tsx`) to include:
+  - A sticky header with app name/logo
+  - Navigation links to main sections
+  - Repositioned dark mode toggle for better accessibility
+  - Updated metadata with appropriate title and description
+- Added links between the homepage and process page for seamless navigation
+- Implemented responsive design for optimal viewing on all device sizes
+- Enhanced dark mode support with appropriate color contrasts
+- Added visual cues for interactive elements like buttons and links
+
+## 2025-05-18
+
+- Fixed PDF.js worker loading issues in the `PdfViewer` component:
+  - Replaced the dynamic import approach with a reliable CDN-based worker source
+  - Updated the worker initialization to use the CDNJS hosted PDF.js worker files
+  - Fixed error "Cannot find module 'pdfjs-dist/build/pdf.worker.entry'" by avoiding module imports
+  - Added proper error handling for PDF worker initialization failures
+  - Enhanced error UI with a dismiss button for better user control
+  - Maintained loading states to provide feedback during PDF worker initialization
+  - Improved error messages to be more user-friendly and descriptive
+  - Ensured better reliability for PDF viewing across different environments
+- Added additional visual feedback during document loading and rendering
+- Improved the overall reliability of the PDF viewing experience
+
+## 2025-05-19
+
+- Revised the project roadmap to include an Advanced Document Editor Interface as Step 3
+- Created a detailed plan for implementing a professional editor layout based on the UI reference:
+  - Top toolbar with Upload, Edit, Convert, Save buttons
+  - Left sidebar with document-specific tools (PDF Tools, Word Tools, Image-Editing)
+  - Right sidebar with editing tools (Draw, Highlight, Text, Crop)
+  - Main canvas area with grid for document editing
+  - Bottom toolbar with zoom controls
+- Designed a 10-part implementation approach for the editor interface:
+  1. Analysis & preparation phase to understand all interface requirements
+  2. Basic editor layout structure implementation
+  3. Creation of toolbar components for all sides of the interface
+  4. Canvas area implementation with grid and document display
+  5. Development of functionality and user interactions
+  6. Integration with existing document viewer components
+  7. Creation of tool-specific interfaces and mode switching
+  8. Accessibility and usability enhancements
+  9. Testing and refinement across different environments
+  10. Documentation and preparation for the next implementation phase
+- Updated the project steps documentation to reflect the new roadmap
+- Created a timeline and milestones for the editor interface implementation
+- Moved the PDF editing features implementation to Step 4 in the roadmap
+
+## 2025-05-20
+
+- Created a new editor page component (`src/app/editor/page.tsx`) implementing the UI reference design:
+  - Implemented a dark-themed professional editor layout with all required components
+  - Created a top toolbar with primary action buttons (Upload, Edit, Convert, Save)
+  - Added a left sidebar for document-specific tools (PDF Tools, Word Tools, Image-Editing)
+  - Implemented a right sidebar with editing tools (Draw, Highlight, Text, Crop)
+  - Created a main canvas area with grid background for document display
+  - Added bottom toolbar with zoom controls
+  - Implemented state management for active tools and zoom level
+  - Added URL parameter handling to receive document information
+- Enhanced the process page (`src/app/process/page.tsx`) to connect with the editor:
+  - Added a unique document ID generation when a file is uploaded
+  - Implemented an "Open in Editor" button that links to the editor page
+  - Added URL parameter passing to transfer document information to the editor
+  - Improved the file information display layout
+- Created a seamless workflow from document upload to editor interface
+- Ensured mobile responsiveness across the entire interface
+- Added visual feedback for active tools and states
+- Implemented accessibility features including ARIA labels and keyboard controls
