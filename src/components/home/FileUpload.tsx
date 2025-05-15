@@ -348,10 +348,10 @@ const FileUpload = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-12 sm:py-20">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden max-w-5xl mx-auto">
-        <div className="flex flex-col md:flex-row">
-          <div className="md:w-1/2 bg-blue-600 dark:bg-blue-800 p-8 md:p-12 text-white">
+    <div className="container mx-auto min-h-screen">
+      <div className="bg-white overflow-hidden w-full mx-auto">
+        <div className="grid min-h-screen grid-cols-1 md:grid-cols-2">
+          <div className="bg-blue-600 dark:bg-blue-800 p-8 md:p-12 text-white">
             <h2 className="text-3xl font-bold mb-4">Get Started</h2>
             <p className="mb-6 opacity-90">
               Upload your documents and start processing them instantly. All processing happens in your browser for maximum privacy.
@@ -384,7 +384,7 @@ const FileUpload = () => {
             </ul>
           </div>
           
-          <div className="md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
+          <div className="p-8 md:p-12 flex flex-col justify-center">
             {error && (
               <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800">
                 {error}
