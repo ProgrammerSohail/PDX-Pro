@@ -95,6 +95,39 @@
     - Test responsiveness.
   - **Documentation:** Update `Change.log` upon completion.
 
+# Plan for Step 8: Add local storage capabilities
+
+- **Goal:** Enhance user experience by persisting certain application states and user preferences locally using the browser's `localStorage`.
+- **Key Areas for `localStorage` Integration:**
+  1.  **User Interface Preferences:**
+      *   Persist the state of sidebars (e.g., collapsed/expanded).
+      *   Remember the last selected category in the editor's left sidebar.
+      *   Store user-defined zoom levels or view settings if they deviate from defaults.
+  2.  **Recent Files List (Metadata Only):**
+      *   Store metadata (e.g., `documentId`, filename, file type/category, timestamp of last access) of recently opened/viewed documents.
+      *   Display a "Recent Files" list (e.g., on the home page or a dedicated section).
+      *   Allow users to quickly re-open recent files (by re-populating `FileContext` or triggering selection if content isn't stored).
+      *   *Note: Full file content will NOT be stored in `localStorage` due to size limitations.*
+  3.  **Editor State (Per Document):**
+      *   For a given `documentId`, store specific editor states like last viewed page number, zoom level, and last used tool for that document type.
+      *   Attempt to restore these settings when a document is re-opened.
+- **Implementation Details:**
+    *   Create utility functions (e.g., in `src/lib/localStorageService.ts`) for safe `localStorage` operations (get, set, remove, error handling, JSON parsing).
+    *   Define clear data structures for stored information (e.g., `UserSettings`, `RecentFileMetadata`, `EditorDocumentState`).
+    *   Integrate service with relevant components (`LeftSidebar.tsx`, `BottomToolbar.tsx`, `EditorPage.tsx`, `FileUpload.tsx`) to read/write preferences.
+    *   Design and implement UI for displaying recent files and managing them.
+- **Considerations:**
+    *   Adhere to `localStorage` size limits (typically 5-10MB); avoid large data.
+    *   Do not store sensitive document content; focus on metadata and preferences.
+    *   Handle potential `localStorage` unavailability or errors gracefully.
+- **Testing:**
+    *   Verify persistence of preferences and states across sessions.
+    *   Test recent files functionality (add, display, open, clear).
+    *   Test editor state restoration.
+- **Documentation:**
+    *   Update `Change.log` with implemented features.
+    *   Mark Step 8 as in progress/complete in `steps.md`.
+
 # Completed Plan for Step 3: Implement Advanced Document Editor Interface
 
 ## 1. Analysis & Preparation

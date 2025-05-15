@@ -11,13 +11,14 @@ This document outlines the planned steps to build the web-based document process
 5.  Implement PDF editing features (using pdf-lib).
 6.  Implement OCR functionality (using Tesseract.js).
 7.  View the PDF in the editor.
-8.  Implement Image Tracing (using ImageTracer.js).
-9.  Implement various file format conversions (Image to PDF, PDF to Image, etc.).
-10. Add security and privacy considerations (input validation, client-side processing).
-11. Implement performance optimizations (Web Workers, lazy loading).
-12. Add testing and validation (Unit, Integration, E2E).
-13. Refine UI/UX and add state management (Redux Toolkit/Context API).
-14. Prepare for deployment (Vercel).
+8.  Add local storage capabilities.
+9.  Implement Image Tracing (using ImageTracer.js).
+10. Implement various file format conversions (Image to PDF, PDF to Image, etc.).
+11. Add security and privacy considerations (input validation, client-side processing).
+12. Implement performance optimizations (Web Workers, lazy loading).
+13. Add testing and validation (Unit, Integration, E2E).
+14. Refine UI/UX and add state management (Redux Toolkit/Context API).
+15. Prepare for deployment (Vercel).
 
 ## Step 1: Configured Dark Mode and Toggle (Completed)
 
@@ -174,3 +175,97 @@ This document outlines the planned steps to build the web-based document process
     - Verify correct display and basic navigation (if applicable).
     - Test responsiveness.
   - **Documentation:** Update `Change.log` upon completion.
+
+## Plan for Step 8: Add local storage capabilities
+
+- **Goal:** Enhance user experience by persisting certain application states and user preferences locally using the browser's `localStorage`.
+- **Key Areas for `localStorage` Integration:**
+  1.  **User Interface Preferences:**
+      *   Persist the state of sidebars (e.g., collapsed/expanded).
+      *   Remember the last selected category in the editor's left sidebar.
+      *   Store user-defined zoom levels or view settings if they deviate from defaults.
+  2.  **Recent Files List (Metadata Only):**
+      *   Store metadata (e.g., `documentId`, filename, file type/category, timestamp of last access) of recently opened/viewed documents.
+      *   Display a "Recent Files" list (e.g., on the home page or a dedicated section).
+      *   Allow users to quickly re-open recent files (by re-populating `FileContext` or triggering selection if content isn't stored).
+      *   *Note: Full file content will NOT be stored in `localStorage` due to size limitations.*
+  3.  **Editor State (Per Document):**
+      *   For a given `documentId`, store specific editor states like last viewed page number, zoom level, and last used tool for that document type.
+      *   Attempt to restore these settings when a document is re-opened.
+- **Implementation Details:**
+    *   Create utility functions (e.g., in `src/lib/localStorageService.ts`) for safe `localStorage` operations (get, set, remove, error handling, JSON parsing).
+    *   Define clear data structures for stored information (e.g., `UserSettings`, `RecentFileMetadata`, `EditorDocumentState`).
+    *   Integrate service with relevant components (`LeftSidebar.tsx`, `BottomToolbar.tsx`, `EditorPage.tsx`, `FileUpload.tsx`) to read/write preferences.
+    *   Design and implement UI for displaying recent files and managing them.
+- **Considerations:**
+    *   Adhere to `localStorage` size limits (typically 5-10MB); avoid large data.
+    *   Do not store sensitive document content; focus on metadata and preferences.
+    *   Handle potential `localStorage` unavailability or errors gracefully.
+- **Testing:**
+    *   Verify persistence of preferences and states across sessions.
+    *   Test recent files functionality (add, display, open, clear).
+    *   Test editor state restoration.
+- **Documentation:**
+    *   Update `Change.log` with implemented features.
+    *   Mark Step 8 as in progress/complete in `steps.md`.
+
+## Plan for Step 9: Implement OCR functionality (using Tesseract.js)
+
+- Create a new component for OCR processing (e.g., `src/components/OcrProcessor.tsx`).
+- Implement the Tesseract.js library for OCR processing.
+- Add functionality to extract text from images.
+- Add functionality to recognize text in documents.
+- Implement text extraction and recognition for various file formats.
+- Create a UI for OCR processing.
+- Update the `Change.log` file to document the completion of this step.
+
+## Plan for Step 10: Implement Image Tracing (using ImageTracer.js)
+
+- Create a new component for image tracing (e.g., `src/components/ImageTracer.tsx`).
+- Implement the ImageTracer.js library for image tracing.
+- Add functionality to trace and outline shapes in images.
+- Implement image tracing for various file formats.
+- Create a UI for image tracing.
+- Update the `Change.log` file to document the completion of this step.
+
+## Plan for Step 11: Implement various file format conversions (Image to PDF, PDF to Image, etc.)
+
+- Create a new component for file conversion (e.g., `src/components/FileConverter.tsx`).
+- Implement file conversion functionality for various formats.
+- Add functionality to convert images to PDF.
+- Add functionality to convert PDF to images.
+- Implement file conversion for various formats.
+- Create a UI for file conversion.
+- Update the `Change.log` file to document the completion of this step.
+
+## Plan for Step 12: Add security and privacy considerations (input validation, client-side processing)
+
+- Implement input validation for all user inputs.
+- Implement client-side processing for security and privacy.
+- Add functionality to handle sensitive data.
+- Create a UI for security and privacy settings.
+- Update the `Change.log` file to document the completion of this step.
+
+## Plan for Step 13: Implement performance optimizations (Web Workers, lazy loading)
+
+- Implement Web Workers for background processing.
+- Implement lazy loading for components and resources.
+- Add functionality to optimize application performance.
+- Create a UI for performance settings.
+- Update the `Change.log` file to document the completion of this step.
+
+## Plan for Step 14: Add testing and validation (Unit, Integration, E2E)
+
+- Implement unit tests for individual components.
+- Implement integration tests for system functionality.
+- Implement end-to-end tests for complete application flow.
+- Create a UI for testing and validation.
+- Update the `Change.log` file to document the completion of this step.
+
+## Plan for Step 15: Refine UI/UX and add state management (Redux Toolkit/Context API)
+
+- Implement Redux Toolkit for state management.
+- Implement Context API for state management.
+- Add functionality to manage application state.
+- Create a UI for state management.
+- Update the `Change.log` file to document the completion of this step.

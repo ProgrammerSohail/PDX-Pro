@@ -1,11 +1,16 @@
 'use client';
 
-import { useState, useCallback, useContext } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from "next/link";
 import PdfViewer from '@/components/PdfViewer';
 import DocxViewer from '@/components/DocxViewer';
 import { useFileContext } from '@/context/FileContext';
+import { 
+  setLocalStorageItem,
+  LOCAL_STORAGE_KEYS,
+  EditorDocumentState 
+} from '@/lib/localStorageService';
 
 // Define supported file types
 const SUPPORTED_EXTENSIONS = [
@@ -162,6 +167,7 @@ const FileUpload = () => {
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [documentId, setDocumentId] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState<boolean>(false);
+  const [navigatingToEditor, setNavigatingToEditor] = useState<boolean>(false);
 
   const isFileSupported = (file: File): boolean => {
     // Check by MIME type
@@ -197,6 +203,7 @@ const FileUpload = () => {
     setFileContent(null); // Clear previous content
     setFileDataUri(null); // Clear previous data URI
     setError(null);
+    setNavigatingToEditor(false);
 
     if (file) {
       if (!isFileSupported(file)) {
@@ -205,7 +212,8 @@ const FileUpload = () => {
       }
 
       // Generate a unique document ID
-      setDocumentId(Date.now().toString());
+      const newDocId = Date.now().toString();
+      setDocumentId(newDocId);
       
       setIsLoading(true);
       const reader = new FileReader();
@@ -275,17 +283,112 @@ const FileUpload = () => {
 
   const handleOpenInEditor = () => {
     if (documentId && selectedFile) {
+      setNavigatingToEditor(true);
       const category = getFileCategory(selectedFile);
+      
       // Store fileDataUri in context if it's a PDF
       if (selectedFile.type === 'application/pdf' && fileDataUri) {
+        // First set the data in context memory
         setFileData(documentId, fileDataUri);
+        
+        // Try to save to localStorage for persistence, but handle large files appropriately
+        try {
+          const storageSizeEstimate = fileDataUri.length * 2; // Rough estimate of size in bytes
+          const isLargeFile = storageSizeEstimate > 2 * 1024 * 1024; // Over 2MB is considered large
+          
+          if (isLargeFile) {
+            console.warn(`PDF is large (${Math.round(storageSizeEstimate/1024/1024)}MB), may not fit in localStorage`);
+            // Try to store metadata only to localStorage
+            setLocalStorageItem<EditorDocumentState>(LOCAL_STORAGE_KEYS.EDITOR_STATE, {
+              documentId: documentId,
+              category: 'pdf',
+              lastEdited: new Date().toISOString(),
+              pdfStorageSkipped: true // Indicate PDF data wasn't stored
+            });
+          } else {
+            // Try storing the full data to localStorage
+            const storageSuccessful = setLocalStorageItem<EditorDocumentState>(LOCAL_STORAGE_KEYS.EDITOR_STATE, {
+              pdfDataUri: fileDataUri,
+              documentId: documentId,
+              category: 'pdf',
+              lastEdited: new Date().toISOString()
+            });
+            
+            if (!storageSuccessful) {
+              console.warn('Failed to save PDF to localStorage, continuing with in-memory only');
+            }
+          }
+        } catch (err) {
+          // If storage fails, we'll still have the PDF in memory via context
+          console.error('Error when trying to save PDF data to localStorage:', err);
+          console.info('PDF will be available in this session but won\'t persist if page refreshes');
+        }
       } else {
         // For non-PDFs or if data URI isn't ready, clear context or pass null
         setFileData(documentId, null); 
       }
+      
+      // Navigate to editor regardless of storage success - we have data in memory
       router.push(`/editor?documentId=${documentId}&type=${category}`);
     }
   };
+
+  // Function to handle uploading another file, with proper cleanup
+  const handleUploadAnother = () => {
+    // Clear all state related to the current file
+    setSelectedFile(null);
+    setFileType(null);
+    setFileContent(null);
+    setFileDataUri(null);
+    setDocumentId(null);
+    setShowPreview(false);
+    setNavigatingToEditor(false);
+    setError(null);
+  };
+
+  // Effect for 'beforeunload' warning if a file is selected but not yet sent to editor
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (selectedFile && showPreview && !navigatingToEditor) {
+        event.preventDefault();
+        event.returnValue = 'You have an unsaved file. Are you sure you want to leave?';
+        return event.returnValue;
+      }
+    };
+
+    // Add listener if a file is selected/loaded, preview is shown, but we are NOT currently navigating to editor
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [selectedFile, showPreview, navigatingToEditor]);
+
+  // Navigation warning for next/navigation
+  useEffect(() => {
+    // For Next.js apps, we can use a combination of approaches
+    // This doesn't completely prevent navigation but adds extra warning
+    const warningMessage = 'You have an unsaved document. Your changes might be lost if you leave.';
+    
+    const handleWindowPopState = (event: PopStateEvent) => {
+      if (selectedFile && showPreview && !navigatingToEditor) {
+        // Show a warning - note that this approach has limitations in modern browsers
+        const confirmNavigation = window.confirm(warningMessage);
+        
+        if (!confirmNavigation) {
+          // Try to stay on the current page
+          window.history.pushState(null, '', window.location.href);
+        }
+      }
+    };
+    
+    // Listen for popstate (browser back/forward buttons)
+    window.addEventListener('popstate', handleWindowPopState);
+    
+    return () => {
+      window.removeEventListener('popstate', handleWindowPopState);
+    };
+  }, [selectedFile, showPreview, navigatingToEditor]);
 
   // Helper to get display name for file type
   const getFileTypeDisplay = (file: File | null): string => {
@@ -378,11 +481,7 @@ const FileUpload = () => {
           
           <div className="flex justify-between">
             <button 
-              onClick={() => {
-                setSelectedFile(null);
-                setFileContent(null);
-                setShowPreview(false);
-              }}
+              onClick={handleUploadAnother}
               className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             >
               Upload Another File

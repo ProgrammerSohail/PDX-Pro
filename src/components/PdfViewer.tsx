@@ -28,7 +28,7 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ fileContent }) => {
   const documentOptions = useMemo(() => ({
     cMapUrl: '/pdfjs-dist/cmaps/',
     cMapPacked: true,
-  }), []); // Empty dependency array means it's created once
+  }), []);
 
   useEffect(() => {
     // Clean up previous object URL if it exists
@@ -106,6 +106,24 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ fileContent }) => {
     }
   }, [fileContent]);
 
+  // Auto-fit PDF to viewport
+  useEffect(() => {
+    if (pdfDataUri && numPages) {
+      // Set a default scale that works well for full screen view
+      // We could make this more sophisticated by calculating based on viewport size
+      const viewportWidth = window.innerWidth;
+      
+      // Adjust scale based on viewport width
+      if (viewportWidth < 768) { // Mobile
+        setScale(0.8);
+      } else if (viewportWidth < 1280) { // Tablet/small desktop
+        setScale(1);
+      } else { // Large screens
+        setScale(1.2);
+      }
+    }
+  }, [pdfDataUri, numPages]);
+
   const handlePreviousPage = () => {
     setPageNumber((prevPageNumber) => Math.max(prevPageNumber - 1, 1));
   };
@@ -158,24 +176,25 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ fileContent }) => {
   }
 
   return (
-    <div className="pdf-viewer-container">
-      <div className="bg-gray-100 dark:bg-gray-800 p-3 mb-4 rounded-lg flex flex-wrap justify-between items-center">
-        <div className="flex items-center space-x-2 mb-2 sm:mb-0">
+    <div className="w-full h-full flex flex-col">
+      {/* Navigation controls */}
+      <div className="flex justify-between items-center p-2 bg-gray-800/80 text-white">
+        <div className="flex items-center space-x-2">
           <button
             onClick={handlePreviousPage}
             disabled={pageNumber <= 1}
-            className="px-3 py-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50"
+            className="px-3 py-1 bg-gray-700 rounded disabled:opacity-50"
             aria-label="Previous page"
           >
             &lt;
           </button>
           <span className="text-sm">
-            Page <span className="font-medium">{pageNumber}</span> of <span className="font-medium">{numPages || '-'}</span>
+            Page {pageNumber} of {numPages || '-'}
           </span>
           <button
             onClick={handleNextPage}
             disabled={!numPages || pageNumber >= numPages}
-            className="px-3 py-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50"
+            className="px-3 py-1 bg-gray-700 rounded disabled:opacity-50"
             aria-label="Next page"
           >
             &gt;
@@ -185,23 +204,23 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ fileContent }) => {
           <button
             onClick={handleZoomOut}
             disabled={scale <= 0.6}
-            className="px-3 py-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50"
+            className="px-3 py-1 bg-gray-700 rounded disabled:opacity-50"
             aria-label="Zoom out"
           >
             −
           </button>
-          <span className="text-sm font-medium">{Math.round(scale * 100)}%</span>
+          <span className="text-sm">{Math.round(scale * 100)}%</span>
           <button
             onClick={handleZoomIn}
             disabled={scale >= 3}
-            className="px-3 py-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50"
+            className="px-3 py-1 bg-gray-700 rounded disabled:opacity-50"
             aria-label="Zoom in"
           >
             +
           </button>
           <button
             onClick={handleResetZoom}
-            className="px-3 py-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-xs"
+            className="px-3 py-1 bg-gray-700 rounded text-xs"
             aria-label="Reset zoom"
           >
             Reset
@@ -209,20 +228,20 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ fileContent }) => {
         </div>
       </div>
 
-      <div className="flex justify-center relative">
+      {/* PDF display area */}
+      <div className="flex-1 overflow-auto flex justify-center items-center bg-gray-800/50">
         <Document
-          file={pdfDataUri} // Use the state that holds the object URL or direct URL/base64
+          file={pdfDataUri}
           onLoadSuccess={onDocumentLoadSuccess}
           onLoadError={onDocumentLoadError}
           loading={
             <div className="flex justify-center items-center p-10">
               <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
-              <span className="ml-2">Loading document...</span>
+              <span className="ml-2 text-white">Loading document...</span>
             </div>
           }
-          className="border border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden shadow-lg"
-          options={documentOptions} // Use the memoized options
-          key={pdfDataUri} // Add key to force re-render of Document component when file changes
+          options={documentOptions}
+          key={pdfDataUri}
         >
           {numPages && (
             <Page 
@@ -231,12 +250,13 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ fileContent }) => {
               loading={
                 <div className="flex justify-center items-center p-10">
                   <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
-                  <span className="ml-2">Rendering page...</span>
+                  <span className="ml-2 text-white">Rendering page...</span>
                 </div>
               }
               renderTextLayer={true}
               renderAnnotationLayer={true}
               onRenderError={onPageRenderError}
+              className="shadow-lg"
             />
           )}
         </Document>

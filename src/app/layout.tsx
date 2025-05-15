@@ -1,39 +1,32 @@
+'use client'; // Make it a Client Component
+
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/layout/Header"
+import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { FileContextProvider } from "@/context/FileContext";
+import { usePathname } from 'next/navigation'; // Import usePathname
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-export const metadata: Metadata = {
-  title: "Document Processing App",
-  description: "A free web-based document processing platform",
-};
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const pathname = usePathname();
+  const showHeaderFooter = !pathname.startsWith('/editor');
+
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={` antialiased`}
       >
         <FileContextProvider>
-          <Header/>
+          {showHeaderFooter && <Header />}
           {children}
-          <Footer />
+          {showHeaderFooter && <Footer />}
         </FileContextProvider>
       </body>
     </html>
