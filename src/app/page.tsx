@@ -11,7 +11,9 @@ export default function Home() {
      <HeroSection />
 
       {/* File Upload Section */}
-      <FileUpload />
+      <div id="upload">
+        <FileUpload />
+      </div>
       
 
       {/* Features Section */}

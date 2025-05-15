@@ -14,12 +14,12 @@ const HeroSection = () => {
               supporting DOCX files, and converting between various file formats.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/process"
+              <a
+                href="#upload"
                 className="px-8 py-3 bg-blue-600 text-white font-medium rounded-lg shadow-lg hover:bg-blue-700 transition-colors duration-200 text-center"
               >
-                Process Documents
-              </Link>
+                Get Started
+              </a>
               <a
                 href="#features"
                 className="px-8 py-3 bg-white dark:bg-gray-800 text-gray-800 dark:text-white font-medium rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 text-center"

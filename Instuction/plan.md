@@ -205,3 +205,181 @@
 ## 3. Update Project Documentation
    - **Task:** Ensure all project documentation files (`Change.log`, `steps.md`, `Project.md`) are up-to-date with the latest changes and implemented features.
    - **Details:** Document the PDF editing features, any new dependencies, and resolved issues.
+
+## Current Plan (2025-05-22)
+
+# Plan for Step 4: Integrate file upload functionality with home page FileUpload component
+
+## 1. Analysis & Preparation
+- Analyze the existing `src/app/process/page.tsx` functionality to identify all components needed for transfer
+- Compare `src/components/home/FileUpload.tsx` current implementation with needed functionality
+- Design UI flow for upload -> preview -> editor transition
+- Plan state management requirements for file data between components
+
+## 2. FileUpload Component Enhancement
+- Modify `src/components/home/FileUpload.tsx` to include all functionality from process page:
+  - Add file processing state variables (selectedFile, fileType, fileContent, etc.)
+  - Implement drag-and-drop interface with highlight effects
+  - Add file validation logic for supported formats
+  - Create file reading functionality using FileReader API
+  - Generate unique document IDs for each uploaded file
+  - Add error handling for unsupported or corrupted files
+
+## 3. Implementation of File Preview
+- Create conditional rendering logic to show preview after upload
+  - Design responsive UI for file preview section
+  - Integrate PdfViewer component for PDF files
+  - Integrate DocxViewer component for DOCX files
+  - Add placeholder for other file types
+- Display file metadata (name, type, size, last modified)
+- Implement loading indicators for file processing
+
+## 4. Editor Integration
+- Implement editor navigation functionality
+  - Add "Open in Editor" button to preview section
+  - Add file type categorization logic to determine editor mode
+  - Implement router navigation with proper parameters
+- Create a "Upload Another File" option to return to upload form
+- Ensure all state resets properly when switching between upload and preview modes
+
+## 5. UI/UX Enhancements
+- Implement smooth transitions between upload and preview states
+- Add consistent styling matching the application's design system
+- Ensure dark mode compatibility for all new UI elements
+- Add accessibility improvements (ARIA labels, keyboard navigation)
+- Create helpful error messages for various error conditions
+
+## 6. Testing & Optimization
+- Test upload functionality with various file types
+- Verify preview rendering for supported document types
+- Test navigation to editor with correct file parameters
+- Ensure proper error handling for edge cases
+- Test responsive design across different screen sizes
+
+## 7. Process Page Deprecation
+- Update any routing references to process page
+- Ensure all functionality is properly transferred to FileUpload component
+- Plan for eventual removal of the process page
+
+## 8. Documentation Updates
+- Update Change.log with detailed changes
+- Mark Step 4 as complete in steps.md
+- Create plan for next step (PDF editing features)
+
+## Timeline & Milestones
+1. Analysis and preparation - Day 1
+2. FileUpload component enhancement - Days 1-2
+3. File preview implementation - Days 2-3
+4. Editor integration - Day 3
+5. UI/UX enhancements - Day 4
+6. Testing and optimization - Day 4
+7. Process page deprecation and documentation - Day 5
+
+# Plan for Step 5: Implement PDF editing features (using pdf-lib)
+
+## 1. Analysis & Preparation
+- Research the capabilities of the pdf-lib library for PDF manipulation
+- Create a plan for integrating pdf-lib with our existing PdfViewer component
+- Design the user interface for PDF editing tools
+- Set up testing environments for PDF editing features
+
+## 2. Install Dependencies & Setup
+- Add pdf-lib as a project dependency
+- Create a new PdfEditor component to handle PDF manipulation
+- Set up state management for tracking PDF modifications
+- Create a bridge between the viewer and editor components
+
+## 3. Basic PDF Text Operations
+- Implement text extraction from PDF documents
+- Create UI for text selection and editing
+- Implement text modification functionality
+- Add text insertion capability
+- Develop text styling options (font, size, color)
+
+## 4. PDF Annotations
+- Implement highlighting functionality
+- Add comment/note annotations
+- Create UI for annotation management
+- Implement annotation styling options
+- Add annotation deletion and modification capabilities
+
+## 5. Form Filling
+- Add support for PDF form detection
+- Implement form field filling functionality
+- Create UI for form field visualization
+- Add form field validation
+- Implement form submission capabilities
+
+## 6. Page Manipulation
+- Add page deletion functionality
+- Implement page reordering
+- Create UI for page navigation and thumbnail view
+- Add page rotation capabilities
+- Implement page extraction to new document
+
+## 7. Image & Content Operations
+- Add image insertion functionality
+- Implement image resizing and positioning
+- Create UI for image management
+- Add drawing tools (shapes, lines, freehand)
+- Implement content redaction capabilities
+
+## 8. PDF Structure Editing
+- Implement bookmark management
+- Add document metadata editing
+- Create UI for document structure visualization
+- Implement PDF security features
+- Add document properties editing
+
+## 9. Export & Save
+- Implement PDF export functionality
+- Add options for export quality and compression
+- Create UI for save/download operations
+- Implement auto-save functionality
+- Add conversion options to other formats
+
+## 10. Testing & Optimization
+- Test PDF editing features across different PDF versions
+- Optimize performance for large documents
+- Add error handling for corrupted documents
+- Ensure compatibility with different browsers
+- Implement undo/redo functionality for all operations
+
+## Timeline & Milestones
+1. Setup and basic text operations - Days 1-3
+2. Annotations and form filling - Days 4-6
+3. Page manipulation and image operations - Days 7-9
+4. Structure editing and export features - Days 10-12
+5. Testing and optimization - Days 13-14
+
+## 4. PDF File Handling Improvements
+
+### Issue Analysis
+- Identified PDF file upload problems with the error "The selected PDF file is empty or corrupted"
+- Root causes:
+  - PDF.js worker configuration issues with Next.js 15.x
+  - Missing proper PDF file validation during upload
+  - Incorrect handling of ArrayBuffer data from FileReader API
+
+### Solution Implemented
+1. **Worker Configuration**:
+   - Added local PDF.js worker file to the public directory
+   - Created fallback mechanism using CDN for reliability
+   - Added TypeScript declarations for worker modules
+   - Configured webpack in next.config.js to handle canvas dependency properly
+
+2. **File Validation**:
+   - Added PDF signature validation in FileUpload component
+   - Improved error handling for invalid/corrupted files
+   - Added proper ArrayBuffer to Blob URL conversion for PDF rendering
+
+3. **Viewer Component**:
+   - Optimized the PdfViewer component to handle different file content formats
+   - Improved error states and loading indicators
+   - Added zoom controls and pagination for better user experience
+
+4. **Next Steps**:
+   - Add more comprehensive file format validation
+   - Implement additional file format support (DOCX, image files)
+   - Optimize file loading performance with progressive loading
+   - Add file export/conversion capabilities

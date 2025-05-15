@@ -12,6 +12,8 @@
 - **Always read all instructions thoroughly before starting any task**
 - **Review all key files** (`Project.md`, `steps.md`, and `instuction.md`) to understand context
 - **Update documentation after each development step:**
+  - Always Create Step first and the for that specific step create plan.
+  - Always `Create Plan` inside `plan.md` and steps in `steps.md`
   - Update `plan.md` with completed work and next steps
   - Mark completed items in `steps.md`
   - Document all changes in `Change.log` with detailed descriptions

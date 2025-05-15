@@ -7,15 +7,16 @@ This document outlines the planned steps to build the web-based document process
 1.  Configure Dark Mode and Toggle.
 2.  Set up basic document upload and viewing (PDF, DOCX).
 3.  Implement Advanced Document Editor Interface.
-4.  Implement PDF editing features (using pdf-lib).
-5.  Implement OCR functionality (using Tesseract.js).
-6.  Implement Image Tracing (using ImageTracer.js).
-7.  Implement various file format conversions (Image to PDF, PDF to Image, etc.).
-8.  Add security and privacy considerations (input validation, client-side processing).
-9.  Implement performance optimizations (Web Workers, lazy loading).
-10. Add testing and validation (Unit, Integration, E2E).
-11. Refine UI/UX and add state management (Redux Toolkit/Context API).
-12. Prepare for deployment (Vercel).
+4.  Integrate file upload functionality with home page FileUpload component.
+5.  Implement PDF editing features (using pdf-lib).
+6.  Implement OCR functionality (using Tesseract.js).
+7.  Implement Image Tracing (using ImageTracer.js).
+8.  Implement various file format conversions (Image to PDF, PDF to Image, etc.).
+9.  Add security and privacy considerations (input validation, client-side processing).
+10. Implement performance optimizations (Web Workers, lazy loading).
+11. Add testing and validation (Unit, Integration, E2E).
+12. Refine UI/UX and add state management (Redux Toolkit/Context API).
+13. Prepare for deployment (Vercel).
 
 ## Step 1: Configured Dark Mode and Toggle (Completed)
 
@@ -96,7 +97,53 @@ This document outlines the planned steps to build the web-based document process
   - Improved the file upload area to indicate support for multiple file formats
 - Updated the `Change.log` file to document the completion of this step.
 
-## Plan for Step 4: Implement PDF editing features (using pdf-lib)
+## Step 4: Integrate file upload functionality with home page FileUpload component
+
+- Move file upload functionality from the process page to the home page FileUpload component:
+  - Modify `src/components/home/FileUpload.tsx` to include all upload functionality from `src/app/process/page.tsx`
+  - Add drag-and-drop interface with support for all file types
+  - Implement file type detection and validation
+  - Add file preview section for supported document types (PDF, DOCX)
+  - Create responsive UI for both the upload form and preview sections
+- Implement direct editor redirection:
+  - Add "Open in Editor" button in the preview section
+  - Implement navigation to the editor page with appropriate file information
+  - Pass document ID and type as URL parameters to the editor
+- Add user experience improvements:
+  - Create loading indicators for file processing
+  - Implement error handling for unsupported or corrupted files
+  - Add file metadata display (type, size, last modified date)
+  - Create a button to upload a different file after preview
+- Ensure all functionality works properly with the existing editor page:
+  - Verify proper file type categorization
+  - Test navigation with file information passing
+  - Confirm the correct display in the editor based on file type
+- Update documentation to reflect changes:
+  - Document the new upload workflow
+  - Update references to the process page
+  - Mark items as completed in documentation files
+
+## Step 5: Fix PDF File Upload and Display Issues
+
+- Resolved the "The selected PDF file is empty or corrupted" error message:
+  - Added local PDF.js worker file to the public directory
+  - Created a proper worker loading mechanism with CDN fallback
+  - Added TypeScript declarations for PDF.js worker modules
+  - Configured webpack in next.config.js for proper PDF.js support
+  
+- Improved PDF file handling in the upload process:
+  - Added PDF signature validation in the FileUpload component
+  - Implemented better error handling for invalid files
+  - Added proper conversion of ArrayBuffer to Blob URL for PDF rendering
+  
+- Enhanced the PdfViewer component:
+  - Improved error states and loading indicators
+  - Added zoom controls and pagination for better user experience
+  - Made the component more resilient to different file content formats
+  
+- Added proper documentation and updated change logs to track the improvements
+
+## Plan for Step 6: Implement PDF editing features (using pdf-lib)
 
 - Create a new component for PDF editing (e.g., `src/components/PdfEditor.tsx`).
 - Implement the `pdf-lib` library for PDF manipulation.

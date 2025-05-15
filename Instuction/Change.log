@@ -15,6 +15,14 @@
 - Integrated `PdfViewer` and `DocxViewer` into `src/app/process/page.tsx` with conditional rendering based on file type.
 - Corrected import paths for `PdfViewer` and `DocxViewer` in `src/app/process/page.tsx` to use the `@/components` alias.
 - Installed `react-pdf` and `mammoth` dependencies using bun.
+- Fixed PDF file upload and display issues:
+  - Added CDN fallback for loading PDF.js worker script to ensure compatibility with Next.js
+  - Implemented better PDF file validation in the FileUpload component
+  - Added proper handling of ArrayBuffer for PDF data by converting to Blob URL
+  - Created TypeScript declaration files for PDF.js worker modules
+  - Added webpack configuration in next.config.js to properly handle canvas dependency
+  - Improved error handling for PDF processing
+- Resolved 'The selected PDF file is empty or corrupted' error message that appeared even with valid PDF files
 
 ## 2025-05-16
 
@@ -143,3 +151,36 @@
   - Made it easy to open any file type in the editor regardless of preview support
 - Updated the file upload area to indicate support for multiple file formats
 - Added scroll capability to the left sidebar to accommodate the expanded list of file categories
+
+## 2025-05-22
+
+- Modified `src/components/home/FileUpload.tsx` to include file upload functionality from the process page:
+  - Integrated file upload and processing functionality directly into the home page
+  - Implemented drag-and-drop interface with visual feedback for file uploads
+  - Added file type detection and validation for all supported formats
+  - Created file content reading logic using FileReader API
+  - Generated unique document IDs for tracking uploaded files
+  - Added comprehensive error handling for unsupported or corrupted files
+- Enhanced the FileUpload component with preview functionality:
+  - Added conditional rendering to show file preview after upload
+  - Integrated PdfViewer component for PDF file preview
+  - Integrated DocxViewer component for DOCX file preview
+  - Created placeholders for other file types without dedicated viewers
+  - Displayed file metadata (name, type, size, last modified date)
+  - Implemented loading indicators during file processing
+- Implemented direct navigation to the editor:
+  - Added "Open in Editor" button to preview section
+  - Created navigation logic to the editor page with file information
+  - Passed document ID and file type as URL parameters
+  - Added file type categorization for proper editor mode selection
+  - Created a "Upload Another File" option to return to the upload form
+- Added UI/UX improvements:
+  - Designed responsive layout for both upload and preview sections
+  - Ensured dark mode compatibility for all UI elements
+  - Added appropriate loading states and error messages
+  - Improved accessibility with ARIA labels and semantic HTML
+- Updated the upload workflow to eliminate the need for a separate process page:
+  - Made file upload, preview, and editing available directly from the home page
+  - Created a seamless transition between upload, preview, and editor stages
+  - Ensured all functionality from the process page is preserved in the new workflow
+- Added documentation for the new upload workflow in project files

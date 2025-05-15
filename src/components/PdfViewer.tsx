@@ -22,27 +22,23 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ fileContent }) => {
 
   // Initialize PDF.js worker
   useEffect(() => {
-    const initializeWorker = () => {
+    const initializeWorker = async () => {
       try {
-        // Recommended way to set workerSrc for Next.js with react-pdf
-        // Ensures the worker is correctly resolved from node_modules
-        pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-          'pdfjs-dist/build/pdf.worker.min.mjs',
-          import.meta.url
-        ).toString();
+        // Use the local worker file from the public directory
+        const workerUrl = `${window.location.origin}/pdf-worker/pdf.worker.min.mjs`;
+        pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
+        
         setWorkerInitialized(true);
       } catch (err) {
         console.error('Failed to initialize PDF worker:', err);
-        // Fallback to CDN if local resolution fails or for specific environments
-        // console.warn('Local worker initialization failed, trying CDN fallback.');
-        // try {
-        //   pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
-        //   setWorkerInitialized(true);
-        // } catch (cdnErr) {
-        //   console.error('CDN PDF worker initialization also failed:', cdnErr);
-        //   setError('Failed to initialize PDF viewer. Please try again later.');
-        // }
-        setError('Failed to initialize PDF viewer. Please try again later.');
+        // Try CDN fallback if the local worker fails
+        try {
+          pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+          setWorkerInitialized(true);
+        } catch (fallbackErr) {
+          console.error('Fallback PDF worker initialization also failed:', fallbackErr);
+          setError('Failed to initialize PDF viewer. Please try again later.');
+        }
       }
     };
 
@@ -122,7 +118,7 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ fileContent }) => {
     return <div className="text-center py-4 text-gray-500 dark:text-gray-400">Select a PDF file to view.</div>;
   }
 
-  // Check for empty ArrayBuffer or empty string
+  // Check for empty ArrayBuffer or empty string - with improved validation
   if (
     (fileContent instanceof ArrayBuffer && fileContent.byteLength === 0) ||
     (typeof fileContent === 'string' && fileContent.length === 0)
@@ -133,6 +129,17 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ fileContent }) => {
         <p>The selected PDF file is empty or corrupted. Please select a valid PDF file.</p>
       </div>
     );
+  }
+
+  // Create a data URL for the file content if it's an ArrayBuffer
+  let pdfData = fileContent;
+  if (fileContent instanceof ArrayBuffer) {
+    try {
+      const blob = new Blob([fileContent], { type: 'application/pdf' });
+      pdfData = URL.createObjectURL(blob);
+    } catch (err) {
+      console.error('Error creating object URL for PDF:', err);
+    }
   }
 
   return (
@@ -194,44 +201,18 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ fileContent }) => {
           </div>
         )}
         <Document
-          file={fileContent}
+          file={pdfData}
           onLoadSuccess={onDocumentLoadSuccess}
           onLoadError={onDocumentLoadError}
           className="border border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden shadow-lg"
-          error={
-            <div className="p-4 text-center text-red-600 dark:text-red-400">
-              <p>Failed to load PDF. Please check if the file is valid.</p>
-            </div>
-          }
-          noData={
-            <div className="p-4 text-center text-gray-500 dark:text-gray-400">
-              <p>No PDF document selected.</p>
-            </div>
-          }
-          loading={
-            <div className="p-8 text-center">
-              <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500 mx-auto mb-2"></div>
-              <p className="text-gray-500 dark:text-gray-400">Loading PDF...</p>
-            </div>
-          }
         >
           <Page 
             pageNumber={pageNumber} 
-            scale={scale} 
+            scale={scale}
             onLoadSuccess={onPageLoadSuccess}
             onRenderError={onPageLoadError}
             renderTextLayer={true}
             renderAnnotationLayer={true}
-            error={
-              <div className="p-4 text-center text-red-600 dark:text-red-400">
-                <p>Error rendering page {pageNumber}.</p>
-              </div>
-            }
-            loading={
-              <div className="p-8 text-center">
-                <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
-              </div>
-            }
           />
         </Document>
       </div>

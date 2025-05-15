@@ -36,9 +36,6 @@ export default function RootLayout({
               DocProcess
             </Link>
             <nav className="flex items-center gap-6">
-              <Link href="/process" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400">
-                Process
-              </Link>
               <a href="#features" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400">
                 Features
               </a>
