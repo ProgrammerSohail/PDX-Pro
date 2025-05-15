@@ -52,35 +52,49 @@ This document outlines the planned steps to build the web-based document process
 - Ensured dark mode compatibility for both viewer components with appropriate color schemes.
 - Added accessibility improvements with proper ARIA labels and semantic HTML.
 - Updated the `Change.log` file to document the completion of this step.
-- **(2025-05-16)** Addressed "Cannot find module 'pdfjs-dist/build/pdf.worker.entry'" error by:
-    - Modifying `src/components/PdfViewer.tsx` to set `pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString()`.
-    - Updating `next.config.ts` with the recommended webpack alias for `canvas`.
+- **(2025-05-16)** Addressed PDF viewer issues:
+    - Fixed "Cannot find module 'pdfjs-dist/build/pdf.worker.entry'" error by:
+      - Modifying `src/components/PdfViewer.tsx` to set `pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString()`.
+      - Updating `next.config.ts` with the recommended webpack alias for `canvas`.
+    - Added handling for empty or corrupted PDF files:
+      - Implemented checks in `PdfViewer.tsx` to detect empty `ArrayBuffer` or empty string content.
+      - Added user-friendly warning message when an empty or corrupted PDF is detected.
 
-## Step 3: Implement Advanced Document Editor Interface
+## Step 3: Implement Advanced Document Editor Interface (Completed)
 
-- Create a dedicated editor interface page (`src/app/editor/page.tsx`) that opens when a document is selected.
-- Implement a professional editor layout with the following components:
+- Created a dedicated editor interface page (`src/app/editor/page.tsx`) that opens when a document is selected.
+- Implemented a professional editor layout with the following components:
   - Top toolbar with primary actions (Upload, Edit, Convert, Save)
   - Left sidebar for document-specific tools (PDF Tools, Word Tools, Image-Editing Tools)
   - Right sidebar for editing tools (Draw, Highlight, Text, Crop)
   - Main canvas area with grid for document display and editing
   - Bottom toolbar with zoom controls and page navigation
-- Develop a consistent dark-themed UI that matches the reference design.
-- Create a seamless transition from document upload to editor interface.
-- Implement state management to track the active document and editing state.
-- Design a responsive layout that works across different screen sizes.
-- Create reusable UI components following the folder structure guidelines:
+- Developed a consistent dark-themed UI that matches the reference design.
+- Created a seamless transition from document upload to editor interface.
+- Implemented state management to track the active document and editing state.
+- Designed a responsive layout that works across different screen sizes.
+- Created reusable UI components following the folder structure guidelines:
   - Toolbar components (TopToolbar, LeftSidebar, RightSidebar)
   - Tool buttons with consistent styling and hover states
   - Canvas area with grid overlay
   - Zoom controls with percentage display
-- Ensure each tool button activates the appropriate editing mode.
-- Add visual feedback for active tools and editing modes.
-- Implement document display within the canvas area.
-- Add navigation between document pages when applicable.
-- Ensure dark mode compatibility throughout the editor interface.
-- Add accessibility features for all interactive elements.
-- Update the `Change.log` file to document the completion of this step.
+- Ensured each tool button activates the appropriate editing mode.
+- Added visual feedback for active tools and editing modes.
+- Implemented document display within the canvas area.
+- Added navigation between document pages when applicable.
+- Ensured dark mode compatibility throughout the editor interface.
+- Added accessibility features for all interactive elements.
+- Enhanced the interface to support all departments/file formats mentioned in the Project.md file:
+  - Expanded the left sidebar to include all document types (PDF, Office, OpenOffice, Graphics, PostScript, Web, Text, Multimedia, 3D Models, Forms)
+  - Added state management for tracking the active document category
+  - Implemented dynamic display of the active category in the canvas area
+  - Provided appropriate icons for each department/file type
+- Enhanced the process page to support all file formats:
+  - Created comprehensive file type definitions with MIME types and extensions
+  - Implemented intelligent file type detection and categorization
+  - Added a placeholder preview for file types without dedicated viewers
+  - Improved the file upload area to indicate support for multiple file formats
+- Updated the `Change.log` file to document the completion of this step.
 
 ## Plan for Step 4: Implement PDF editing features (using pdf-lib)
 

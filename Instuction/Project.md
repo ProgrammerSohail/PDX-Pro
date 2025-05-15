@@ -254,3 +254,26 @@ All processing will happen client-side, ensuring user data never leaves their de
 ---
 
 ## 🧭 Suggested Project Structure (Next.js)
+
+## - Support for These multiple file formats
+PDF Files: .pdf
+
+Microsoft Office Documents: .doc, .docx, .xls, .xlsx, .ppt, .pptx
+
+OpenOffice/StarOffice Documents: .odt, .odp, .ods, .odg, .odf, .sxw, .sxi, .sxc, .sxd, .stw
+
+Graphics Files: .psd, .ai, .bmp, .gif, .jpeg, .jpg, .png, .tif, .tiff
+
+PostScript Files: .ps, .eps
+
+Web Files: .htm, .html
+
+Text Files: .txt, .rtf
+
+Multimedia Files: .mp4, .mov, .mp3, .wav, .swf
+
+3D Model Files: .u3d, .prc
+
+Form Data Files: .fdf, .xfdf
+
+Other Files: .xps, .xml, .joboptions, .acrodata, .sequent, .acrosequ, .acrolang, .acroplugin, .api, .acrobatsecuritysettings, .ast, .env, .lex, .mars, .apf, .mjd, .pdx, .jdf, .lng, .acrosequ, .acrolang, .acroplugin, .api, .acrobatsecuritysettings, .ast, .env, .lex, .mars, .apf, .mjd, .pdx, .jdf, .lng

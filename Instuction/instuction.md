@@ -1,53 +1,25 @@
-Files Path: Instuction/Change.log Project.md steps.md instuction.md
+# Project Development Guidelines
 
+## Important Files
+- `Instuction/Change.log` - Records all changes made to the project
+- `Project.md` - Contains project overview and requirements
+- `steps.md` - Lists development steps and their status
+- `instuction.md` - This file, containing development guidelines
 
-<StrictRules>
-Always Read the instruction before you start.
-Read project.md file,steps.md file,instuction.md file.
-Always update the plan.md file after each step.
-Also updated the steps.md file after each step.
-Update the Change.log after each change.
-</StrictRules>
+## Development Rules
 
-<PlanMode>
-Always Create a plan for the next step after completing the step.
-</PlanMode>
+### Documentation Requirements
+- **Always read all instructions thoroughly before starting any task**
+- **Review all key files** (`Project.md`, `steps.md`, and `instuction.md`) to understand context
+- **Update documentation after each development step:**
+  - Update `plan.md` with completed work and next steps
+  - Mark completed items in `steps.md`
+  - Document all changes in `Change.log` with detailed descriptions
 
-<FolderStructure>
-Always : Contains reusable UI elements like buttons, headers, and footers. Each component resides in its own file with its logic and can use as a child component.
-src/
-├── components/          # Reusable UI components
-│   ├── Button/
-│   │   ├── Button.jsx
-│   │   ├── Button.module.css
-│   │   
-│   ├── Navbar/
-│   │   ├── Navbar.jsx
-│   │   ├── Navbar.module.css
-│   │   └── 
-│   └── ...
-├── containers/          # Components handling data fetching and state
-│   ├── UserProfileContainer.jsx
-│   └── ...
-├── pages/               # Page-level components
-│   ├── HomePage.jsx
-│   ├── AboutPage.jsx
-│   └── ...
-├── templates/           # Layout templates
-│   ├── MainLayout.jsx
-│   └── ...
-├── assets/              # Static assets like images and fonts
-│   ├── images/
-│   └── fonts/
-├── styles/              # Global styles and variables
-│   ├── variables.css
-│   └── global.css
-├── utils/               # Utility functions
-│   ├── api.js
-│   └── helpers.js
-├── App.jsx              # Root component
-└── index.js             # Entry point
+### Planning Approach
+- After completing each development step, create a detailed plan for the next step
+- Include specific tasks, implementation details, and expected outcomes
+- Use the plan as a roadmap for development
 
-</FolderStructure>
-
-
+### Project Structure
+The project follows a modular component-based architecture:

@@ -122,6 +122,19 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ fileContent }) => {
     return <div className="text-center py-4 text-gray-500 dark:text-gray-400">Select a PDF file to view.</div>;
   }
 
+  // Check for empty ArrayBuffer or empty string
+  if (
+    (fileContent instanceof ArrayBuffer && fileContent.byteLength === 0) ||
+    (typeof fileContent === 'string' && fileContent.length === 0)
+  ) {
+    return (
+      <div className="bg-yellow-100 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400 p-4 rounded-lg border border-yellow-400 dark:border-yellow-800">
+        <p className="font-semibold mb-1">Warning</p>
+        <p>The selected PDF file is empty or corrupted. Please select a valid PDF file.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="pdf-viewer-container">
       <div className="bg-gray-100 dark:bg-gray-800 p-3 mb-4 rounded-lg flex flex-wrap justify-between items-center">

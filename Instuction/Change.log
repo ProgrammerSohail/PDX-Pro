@@ -19,6 +19,7 @@
 ## 2025-05-16
 
 - Modified `src/components/PdfViewer.tsx` to correctly initialize the PDF.js worker for Next.js by setting `pdfjs.GlobalWorkerOptions.workerSrc` to `new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString()`. This addresses the "Cannot find module 'pdfjs-dist/build/pdf.worker.entry'" error. <mcreference link="https://www.npmjs.com/package/react-pdf" index="4">4</mcreference>
+- Added a check in `PdfViewer.tsx` to handle empty or corrupted PDF files, displaying a user-friendly warning message.
 - Updated `next.config.ts` to include `webpack: (config) => { config.resolve.alias.canvas = false; return config; }` as recommended by `react-pdf` documentation for Next.js projects to resolve potential canvas-related issues. <mcreference link="https://www.npmjs.com/package/react-pdf" index="4">4</mcreference>
 - Created plan.md file to track all next plan.
 - Enhanced `src/app/process/page.tsx` with drag-and-drop functionality for improved user experience.
@@ -110,3 +111,35 @@
 - Ensured mobile responsiveness across the entire interface
 - Added visual feedback for active tools and states
 - Implemented accessibility features including ARIA labels and keyboard controls
+
+## 2025-05-21
+
+- Enhanced the editor interface with support for all departments/file formats mentioned in the Project.md file:
+  - Updated the left sidebar in `src/app/editor/page.tsx` to include all document types:
+    - PDF Files (.pdf)
+    - Microsoft Office Documents (.doc, .docx, .xls, .xlsx, .ppt, .pptx)
+    - OpenOffice/StarOffice Documents (.odt, .odp, .ods, .odg, .odf, etc.)
+    - Graphics Files (.psd, .ai, .bmp, .gif, .jpeg, .jpg, .png, etc.)
+    - PostScript Files (.ps, .eps)
+    - Web Files (.htm, .html)
+    - Text Files (.txt, .rtf)
+    - Multimedia Files (.mp4, .mov, .mp3, .wav, .swf)
+    - 3D Model Files (.u3d, .prc)
+    - Form Data Files (.fdf, .xfdf)
+  - Added appropriate icons for each category
+  - Implemented active state indicator for the selected category
+  - Displayed the active category in the canvas area
+- Enhanced the process page (`src/app/process/page.tsx`) to support all file formats:
+  - Created comprehensive file type definitions with MIME types and extensions
+  - Implemented mappings between file extensions, MIME types, and categories
+  - Added improved file type detection and validation
+  - Updated the file input to accept all supported file formats
+  - Enhanced file information display to show the document category
+  - Added a placeholder preview for file types that don't have dedicated viewers yet
+  - Improved the "Open in Editor" functionality to pass the correct category to the editor
+- Implemented improved user experience for unsupported file formats:
+  - Added a dedicated placeholder UI for files without preview capability
+  - Provided clear messaging about preview limitations
+  - Made it easy to open any file type in the editor regardless of preview support
+- Updated the file upload area to indicate support for multiple file formats
+- Added scroll capability to the left sidebar to accommodate the expanded list of file categories
