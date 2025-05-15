@@ -10,13 +10,14 @@ This document outlines the planned steps to build the web-based document process
 4.  Integrate file upload functionality with home page FileUpload component.
 5.  Implement PDF editing features (using pdf-lib).
 6.  Implement OCR functionality (using Tesseract.js).
-7.  Implement Image Tracing (using ImageTracer.js).
-8.  Implement various file format conversions (Image to PDF, PDF to Image, etc.).
-9.  Add security and privacy considerations (input validation, client-side processing).
-10. Implement performance optimizations (Web Workers, lazy loading).
-11. Add testing and validation (Unit, Integration, E2E).
-12. Refine UI/UX and add state management (Redux Toolkit/Context API).
-13. Prepare for deployment (Vercel).
+7.  View the PDF in the editor.
+8.  Implement Image Tracing (using ImageTracer.js).
+9.  Implement various file format conversions (Image to PDF, PDF to Image, etc.).
+10. Add security and privacy considerations (input validation, client-side processing).
+11. Implement performance optimizations (Web Workers, lazy loading).
+12. Add testing and validation (Unit, Integration, E2E).
+13. Refine UI/UX and add state management (Redux Toolkit/Context API).
+14. Prepare for deployment (Vercel).
 
 ## Step 1: Configured Dark Mode and Toggle (Completed)
 
@@ -155,3 +156,21 @@ This document outlines the planned steps to build the web-based document process
 - Create a UI for editing operations.
 - Add functionality to save edited PDF files.
 - Update the `Change.log` file to document the completion of this step.
+
+## Plan for Step 7: View the PDF in the editor
+
+- **Goal:** Display the uploaded PDF content within the main canvas area of the editor interface.
+- **Tasks:**
+  - **Integrate `PdfViewer`:** Utilize the existing `PdfViewer` component within the editor's main canvas area.
+  - **Pass PDF Data:** Ensure the selected PDF file data (URL or ArrayBuffer) is correctly passed from the `FileUpload` component (or wherever the file is managed after upload) to the `PdfViewer` instance in the editor.
+  - **Canvas Sizing and Responsiveness:** Ensure the `PdfViewer` fits correctly within the allocated canvas space and is responsive to window size changes.
+  - **Editor Toolbar Integration (Placeholder):** While full editing isn't the goal of this step, consider how the PDF view will interact with existing/future editor toolbars (e.g., zoom, page navigation if not part of `PdfViewer` itself).
+  - **State Management:** Update application state to reflect that a PDF is being viewed in the editor.
+  - **Error Handling:** Implement robust error handling for scenarios like:
+    - PDF data not being available.
+    - Issues with rendering the PDF within the viewer.
+  - **Testing:**
+    - Test with various PDF files (single/multi-page, different sizes).
+    - Verify correct display and basic navigation (if applicable).
+    - Test responsiveness.
+  - **Documentation:** Update `Change.log` upon completion.

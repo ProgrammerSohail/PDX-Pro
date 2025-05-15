@@ -77,6 +77,24 @@
 4. Structure editing and export features - Days 10-12
 5. Testing and optimization - Days 13-14
 
+# Plan for Step 7: View the PDF in the editor
+
+- **Goal:** Display the uploaded PDF content within the main canvas area of the editor interface.
+- **Tasks:**
+  - **Integrate `PdfViewer`:** Utilize the existing `PdfViewer` component within the editor's main canvas area.
+  - **Pass PDF Data:** Ensure the selected PDF file data (URL or ArrayBuffer) is correctly passed from the `FileUpload` component (or wherever the file is managed after upload) to the `PdfViewer` instance in the editor.
+  - **Canvas Sizing and Responsiveness:** Ensure the `PdfViewer` fits correctly within the allocated canvas space and is responsive to window size changes.
+  - **Editor Toolbar Integration (Placeholder):** While full editing isn't the goal of this step, consider how the PDF view will interact with existing/future editor toolbars (e.g., zoom, page navigation if not part of `PdfViewer` itself).
+  - **State Management:** Update application state to reflect that a PDF is being viewed in the editor.
+  - **Error Handling:** Implement robust error handling for scenarios like:
+    - PDF data not being available.
+    - Issues with rendering the PDF within the viewer.
+  - **Testing:**
+    - Test with various PDF files (single/multi-page, different sizes).
+    - Verify correct display and basic navigation (if applicable).
+    - Test responsiveness.
+  - **Documentation:** Update `Change.log` upon completion.
+
 # Completed Plan for Step 3: Implement Advanced Document Editor Interface
 
 ## 1. Analysis & Preparation

@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useContext } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from "next/link";
 import PdfViewer from '@/components/PdfViewer';
 import DocxViewer from '@/components/DocxViewer';
+import { useFileContext } from '@/context/FileContext';
 
 // Define supported file types
 const SUPPORTED_EXTENSIONS = [
@@ -151,9 +152,11 @@ const FILE_CATEGORIES: Record<string, string> = {
 
 const FileUpload = () => {
   const router = useRouter();
+  const { setFileData } = useFileContext();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileType, setFileType] = useState<string | null>(null);
   const [fileContent, setFileContent] = useState<string | ArrayBuffer | null>(null);
+  const [fileDataUri, setFileDataUri] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState<boolean>(false);
@@ -192,6 +195,7 @@ const FileUpload = () => {
     setSelectedFile(file);
     setFileType(file?.type || null);
     setFileContent(null); // Clear previous content
+    setFileDataUri(null); // Clear previous data URI
     setError(null);
 
     if (file) {
@@ -209,16 +213,21 @@ const FileUpload = () => {
       reader.onload = (e) => {
         const result = e.target?.result || null;
         
-        // For PDF files, validate the content before proceeding
         if (file.type === 'application/pdf') {
-          // Minimal validation - we'll let the PDF viewer handle most of the validation
           if (file.size === 0) {
             setError('The PDF file appears to be empty. Please select a valid PDF file.');
             setIsLoading(false);
             return;
           }
-          
-          // All other validation is handled by the PDF viewer component
+          // For PDFs, also convert ArrayBuffer to Data URI for editor
+          if (result instanceof ArrayBuffer) {
+            const blob = new Blob([result], { type: 'application/pdf' });
+            const dataUrlReader = new FileReader();
+            dataUrlReader.onloadend = () => {
+              setFileDataUri(dataUrlReader.result as string);
+            };
+            dataUrlReader.readAsDataURL(blob);
+          }
         }
         
         setFileContent(result);
@@ -267,6 +276,13 @@ const FileUpload = () => {
   const handleOpenInEditor = () => {
     if (documentId && selectedFile) {
       const category = getFileCategory(selectedFile);
+      // Store fileDataUri in context if it's a PDF
+      if (selectedFile.type === 'application/pdf' && fileDataUri) {
+        setFileData(documentId, fileDataUri);
+      } else {
+        // For non-PDFs or if data URI isn't ready, clear context or pass null
+        setFileData(documentId, null); 
+      }
       router.push(`/editor?documentId=${documentId}&type=${category}`);
     }
   };

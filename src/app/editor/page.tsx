@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { useFileContext } from '@/context/FileContext';
 
 // Import components
 import TopToolbar from '@/components/editer/TopToolbar';
@@ -13,24 +14,38 @@ import BottomToolbar from '@/components/editer/BottomToolbar';
 // Editor component - follows the layout structure from the UI reference
 export default function EditorPage() {
   const searchParams = useSearchParams();
+  const { documentId: contextDocumentId, fileDataUri: contextFileDataUri } = useFileContext();
+
   const [activeDocument, setActiveDocument] = useState<string | null>(null);
   const [activeTool, setActiveTool] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [zoom, setZoom] = useState<number>(100);
+  const [pdfDataForViewer, setPdfDataForViewer] = useState<string | null>(null);
   
-  // Get document info from URL parameters
+  // Get document info from URL parameters and context
   useEffect(() => {
-    const documentId = searchParams.get('documentId');
-    const documentType = searchParams.get('type');
+    const urlDocumentId = searchParams.get('documentId');
+    const urlDocumentType = searchParams.get('type');
     
-    if (documentId) {
-      setActiveDocument(documentId);
-      // Set initial active category based on document type
-      if (documentType) {
-        setActiveCategory(getCategoryFromType(documentType));
+    if (urlDocumentId) {
+      setActiveDocument(urlDocumentId);
+      const category = getCategoryFromType(urlDocumentType || 'pdf');
+      setActiveCategory(category);
+
+      if (category === 'pdf') {
+        if (contextDocumentId === urlDocumentId && contextFileDataUri) {
+          setPdfDataForViewer(contextFileDataUri);
+        } else {
+          console.warn(`PDF data for documentId ${urlDocumentId} not found in context or context ID mismatch.`);
+        }
+      }
+    } else {
+      if (contextDocumentId && contextFileDataUri) {
+        // Potentially set activeDocument, activeCategory, and pdfDataForViewer from context
+        // router.replace(`/editor?documentId=${contextDocumentId}&type=${determineCategoryFromData(contextFileDataUri)}`);
       }
     }
-  }, [searchParams]);
+  }, [searchParams, contextDocumentId, contextFileDataUri]);
 
   // Helper function to determine category from file type
   const getCategoryFromType = (type: string): string => {
@@ -104,6 +119,7 @@ export default function EditorPage() {
         <Canvas 
           activeDocument={activeDocument}
           activeCategory={activeCategory}
+          pdfDataUri={activeCategory === 'pdf' ? pdfDataForViewer : null}
         />
 
         {/* Right Sidebar - Editing Tools */}
